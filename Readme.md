@@ -61,7 +61,7 @@ use pixelo\Facades\Pixelo;
 $dataUri = Pixelo::make('Jackson Konjengbam')->toBase64();
 
 // Laravel HTTP response (for controller actions)
-return Pixelo::make('Jackson Konjengbam')->size(256)->shape('rounded')->toResponse();
+return Pixelo::make('Jane Smith')->size(256)->shape('rounded')->toResponse();
 
 // Save PNG to disk
 Pixelo::make('Alice')->save(storage_path('app/public/avatars/alice.png'));
@@ -88,7 +88,7 @@ $png = Pixelo::make('Bob')
 $src = pixelo('Jackson Konjengbam');
 
 // With options
-$src = pixelo('Jackson Konjengbam', [
+$src = pixelo('Jane Smith', [
     'size'   => 64,
     'shape'  => 'rounded',
     'bg'     => '5E35B1',     // hex without #
@@ -113,13 +113,13 @@ $url = pixelo_url('Jackson Konjengbam', ['size' => 128, 'shape' => 'circle']);
 
 {{-- Route URL --}}
 <img src="@pixeloUrl('Jackson Konjengbam')" width="64" alt="JD">
-<img src="{{ pixelo_url('Jackson Konjengbam', ['size' => 128]) }}" width="128">
+<img src="{{ pixelo_url('Jane Smith', ['size' => 128]) }}" width="128">
 ```
 
 ### HTTP endpoint
 
 ```
-GET /pixelo/avatar?name=John+Doe
+GET /pixelo/avatar?name=Jackson+Konjengbam
 GET /pixelo/avatar?name=Jane+Smith&size=256&shape=rounded
 GET /pixelo/avatar?name=Bob&size=64&shape=square&bg=1E88E5&fg=FFFFFF
 GET /pixelo/avatar?name=Alice&size=128&length=1
