@@ -37,7 +37,7 @@ No external services, no heavy dependencies — just PHP's built-in GD extension
 ## Installation
 
 ```bash
-composer require jackson/pixelo
+composer require pixelo/avatar-generator
 ```
 
 Laravel's package auto-discovery registers the service provider and `Pixelo` facade automatically.
