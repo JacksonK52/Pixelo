@@ -1,18 +1,53 @@
 {
-    "name": "jackson/pixelo",
-    "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.",
-    "autoload": {
-        "psr-4": {
-            "Pixelo\\": "src/"
-        }
-    },
+    "name": "pixelo/avatar-generator",
+    "description": "Generate dynamic profile placeholder images for Laravel applications",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "avatar",
+        "placeholder",
+        "image",
+        "profile"
+    ],
     "license": "MIT",
     "authors": [
         {
-            "name": "Jackson K"
+            "name": "Jackson K",
+            "email": "jacksonkonjengbam@gmail.com"
         }
     ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/routing": "^10.0|^11.0|^12.0",
+        "ext-gd": "*"
+    },
     "require-dev": {
         "orchestra/testbench": "^10.11"
-    }
+    },
+    "autoload": {
+        "psr-4": {
+            "pixelo\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "pixelo\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "pixelo\\PixeloServiceProvider"
+            ],
+            "aliases": {
+                "pixelo": "pixelo\\Facades\\Pixelo"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
