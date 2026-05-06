@@ -1,185 +1,238 @@
-# Pixelo
+# Pixelo — Laravel Avatar Generator
 
-A zero-dependency Laravel package for generating dynamic profile placeholder images.  
-Initials are extracted from any name string, colored from a curated palette, and rendered as a crisp PNG — all via PHP's built-in GD extension.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-8.0%2B-blue)](https://php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-10%2B-red)](https://laravel.com)
+
+Generate dynamic, colorful profile placeholder images from any name string.  
+No external services, no heavy dependencies — just PHP's built-in GD extension.
 
 ---
 
 ## Features
 
-- 🎨 Auto-picks a distinct background color per name (consistent across requests)
-- 🔤 Extracts 1–4 initials from any name or string
-- 🔵 Three shapes: **circle**, **square**, **rounded**
-- 📐 Configurable size (16–1024 px)
-- 🌐 Built-in HTTP route (`GET /avatar?name=John+Doe`)
-- 🖼️ Blade directive `@avatar`, helper `avatar()`, and Facade
-- ⚡ ETag-based HTTP caching
-- 🎨 Full color override support
-- Zero external dependencies (GD only)
+- 🎨 **Deterministic colors** — same name always maps to the same color
+- 🔤 **Smart initials** — extracts 1–4 initials from any name string
+- 🔵 **Three shapes** — `circle`, `square`, `rounded`
+- 📐 **Any size** — 16 px to 1024 px
+- 🌐 **HTTP route** — use as a plain `<img src>` URL
+- 🖼️ **Blade directives** — `@pixeloAvatar`, `@pixeloUrl`
+- ⚡ **ETag caching** — proper `Cache-Control` + `ETag` headers
+- 🎨 **Full color control** — override background + foreground per call
+- 🧩 **Custom palette** — swap the default 18-color palette in config
+- 0️⃣ **Zero extra dependencies** — GD only
 
 ---
 
 ## Requirements
 
-| Requirement | Version |
-|-------------|---------|
-| PHP         | ^8.1    |
-| Laravel     | ^10, ^11, ^12 |
-| ext-gd      | *       |
+| | |
+|---|---|
+| PHP | ^8.0 |
+| Laravel | ^10, ^11, ^12 |
+| ext-gd | * |
 
 ---
 
 ## Installation
 
 ```bash
-composer require yourvendor/laravel-avatar
+composer require jackson/pixelo
 ```
 
-Laravel's auto-discovery registers the service provider and `Avatar` facade automatically.
+Laravel's package auto-discovery registers the service provider and `Pixelo` facade automatically.
 
-Optionally publish the config:
+Publish the config (optional):
 
 ```bash
-php artisan vendor:publish --tag=avatar-config
+php artisan vendor:publish --tag=pixelo-config
 ```
 
 ---
 
 ## Usage
 
-### Via Facade
+### Facade
 
 ```php
-use YourVendor\LaravelAvatar\Facades\Avatar;
+use pixelo\Facades\Pixelo;
 
-// Data URI (embed directly in <img>)
-$dataUri = Avatar::make('John Doe')->toBase64();
+// Embed in <img src>
+$dataUri = Pixelo::make('John Doe')->toBase64();
 
-// Laravel HTTP response
-return Avatar::make('Jane Smith')->size(256)->shape('rounded')->toResponse();
+// Laravel HTTP response (for controller actions)
+return Pixelo::make('Jane Smith')->size(256)->shape('rounded')->toResponse();
 
-// Save to disk
-Avatar::make('Alice')->save(storage_path('app/public/avatars/alice.png'));
+// Save PNG to disk
+Pixelo::make('Alice')->save(storage_path('app/public/avatars/alice.png'));
 
-// Full chain
-$png = Avatar::make('Bob')
+// Route URL via facade
+$url = Pixelo::make('Bob')->url('Bob', ['size' => 64, 'shape' => 'circle']);
+
+// Full chain — all options
+$png = Pixelo::make('Bob')
     ->size(200)
     ->shape('circle')
     ->background('#1E88E5')
     ->color('#FFFFFF')
+    ->fontSize(0.45)    // font size as fraction of image size
+    ->bold(true)
     ->length(2)
     ->toPng();
 ```
 
-### Via helper function
+### Helper functions
 
 ```php
-// Returns data URI
-$src = avatar('John Doe');
+// Returns a data URI
+$src = pixelo('John Doe');
 
 // With options
-$src = avatar('Jane Smith', [
+$src = pixelo('Jane Smith', [
     'size'   => 64,
     'shape'  => 'rounded',
-    'bg'     => '5E35B1',
+    'bg'     => '5E35B1',     // hex without #
     'fg'     => 'FFFFFF',
+    'length' => 2,
+    'bold'   => false,
 ]);
 
-// Route URL
-$url = avatar_url('John Doe', ['size' => 128, 'shape' => 'circle']);
+// Returns a route URL
+$url = pixelo_url('John Doe', ['size' => 128, 'shape' => 'circle']);
 ```
 
-### In Blade templates
+### Blade templates
 
 ```blade
-{{-- Embed as data URI --}}
-<img src="{{ avatar('John Doe') }}" width="64" height="64" alt="JD">
+{{-- Data URI (inline, no HTTP request) --}}
+<img src="{{ pixelo('John Doe') }}" width="64" height="64" alt="JD">
 
-{{-- Blade directive (outputs data URI string) --}}
-<img src="@avatar('John Doe')" width="64" alt="JD">
+{{-- Blade directive --}}
+<img src="@pixeloAvatar('John Doe')" width="64" alt="JD">
+<img src="@pixeloAvatar('Jane', ['size' => 96, 'shape' => 'rounded'])" width="96" alt="J">
 
 {{-- Route URL --}}
-<img src="@avatarUrl('John Doe')" width="64" alt="JD">
-<img src="{{ avatar_url('John Doe', ['size' => 128]) }}" width="128" alt="JD">
+<img src="@pixeloUrl('John Doe')" width="64" alt="JD">
+<img src="{{ pixelo_url('John Doe', ['size' => 128]) }}" width="128">
 ```
 
-### Via HTTP route
-
-The package registers a route at `GET /avatar`:
+### HTTP endpoint
 
 ```
-GET /avatar?name=John+Doe
-GET /avatar?name=Jane+Smith&size=256&shape=rounded
-GET /avatar?name=Bob&size=64&shape=square&bg=1E88E5&fg=FFFFFF
-GET /avatar?name=Alice&size=128&length=1
+GET /pixelo/avatar?name=John+Doe
+GET /pixelo/avatar?name=Jane+Smith&size=256&shape=rounded
+GET /pixelo/avatar?name=Bob&size=64&shape=square&bg=1E88E5&fg=FFFFFF
+GET /pixelo/avatar?name=Alice&size=128&length=1
 ```
 
 **Query parameters:**
 
-| Parameter | Type    | Default  | Description                            |
-|-----------|---------|----------|----------------------------------------|
-| `name`    | string  | `?`      | Name to extract initials from          |
-| `size`    | integer | `128`    | Image size in pixels (16–1024)         |
-| `shape`   | string  | `circle` | `circle`, `square`, or `rounded`       |
-| `bg`      | string  | auto     | Background hex color (without `#`)     |
-| `fg`      | string  | auto     | Foreground/text hex color (without `#`)|
-| `length`  | integer | `2`      | Number of initials to render (1–4)     |
+| Parameter | Type    | Default       | Description                             |
+|-----------|---------|---------------|-----------------------------------------|
+| `name`    | string  | `?`           | Name to extract initials from           |
+| `size`    | integer | `128`         | Image size in pixels (16–1024)          |
+| `shape`   | string  | `circle`      | `circle`, `square`, or `rounded`        |
+| `bg`      | string  | auto          | Background hex (without `#`)            |
+| `fg`      | string  | auto          | Foreground/text hex (without `#`)       |
+| `length`  | integer | `2`           | Number of initials to render (1–4)      |
+
+---
+
+## API Reference
+
+All methods on `AvatarGenerator` are fluent (chainable). `make()` returns a fresh clone so the base instance is never mutated.
+
+### Builder methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `make` | `make(string $name): static` | Set the name to generate initials from. Always call this first. |
+| `size` | `size(int $size): static` | Image width/height in pixels. Clamped to 16–1024. |
+| `shape` | `shape(string $shape): static` | `'circle'`, `'square'`, or `'rounded'`. Throws on invalid value. |
+| `background` | `background(string $color): static` | Background hex color (with or without `#`). |
+| `color` | `color(string $color): static` | Foreground/text hex color (with or without `#`). |
+| `fontSize` | `fontSize(float $ratio): static` | Font size as a fraction of image size (0.1–0.9). Default: `0.40`. |
+| `bold` | `bold(bool $bold = true): static` | Whether to use a bold font weight. Default: `true`. |
+| `length` | `length(int $length): static` | Number of initials to render (1–4). Default: `2`. |
+
+### Output methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `toPng()` | `string` | Raw PNG binary. |
+| `toBase64()` | `string` | Data URI: `data:image/png;base64,…` — embed directly in `<img src>`. |
+| `toResponse()` | `Illuminate\Http\Response` | Laravel HTTP response with `Content-Type: image/png` and caching headers. |
+| `save(string $path)` | `string` | Write PNG to disk, returns the path. |
+| `url(string $name, array $options = [])` | `string` | Build a URL to the built-in `pixelo.avatar` route. |
 
 ---
 
 ## Configuration
 
-After publishing, edit `config/avatar.php`:
+`config/pixelo.php` after publishing:
 
 ```php
 return [
     'size'         => 128,
-    'shape'        => 'circle',   // circle | square | rounded
+    'shape'        => 'circle',      // circle | square | rounded
     'length'       => 2,
-    'font_ratio'   => 0.40,       // font size as fraction of image size
+    'font_ratio'   => 0.40,          // font size as fraction of image size
     'bold'         => true,
-    'route_prefix' => 'avatar',   // URI: GET /avatar
+    'route_prefix' => 'pixelo/avatar',
 
-    // Optional: override the default color palette
-    // Each entry: [background_hex, foreground_hex]
+    // Override the color palette — [background_hex, foreground_hex]
     'palette' => null,
+    // Example:
+    // 'palette' => [
+    //     ['#0F172A', '#38BDF8'],
+    //     ['#064E3B', '#6EE7B7'],
+    // ],
 ];
 ```
 
 ---
 
-## Advanced Examples
+## Custom font
 
-### In a User model / resource
+Drop any `.ttf` file into `src/Fonts/` and name it `Roboto-Bold.ttf` (or `NotoSans-Bold.ttf`).  
+Pixelo picks it up automatically. Without a custom font it falls back to GD's built-in bitmap font.
+
+---
+
+## Patterns
+
+### User model accessor
 
 ```php
 // app/Models/User.php
 public function getAvatarAttribute(): string
 {
-    return avatar($this->name, ['size' => 128]);
+    return pixelo($this->name, ['size' => 128]);
 }
-
-// In API resource
-'avatar' => avatar_url($this->name, ['size' => 128, 'shape' => 'circle']),
 ```
 
-### Consistent per-user color
-
-The package deterministically maps any name string to a palette color — the same name **always** produces the same avatar. No storage needed.
-
-### Custom palette
+### API resource
 
 ```php
-// config/avatar.php
-'palette' => [
-    ['#0F172A', '#38BDF8'],  // Dark navy / Sky blue
-    ['#064E3B', '#6EE7B7'],  // Dark green / Mint
-    ['#4C1D95', '#C4B5FD'],  // Deep purple / Lavender
-],
+// app/Http/Resources/UserResource.php
+'avatar' => pixelo_url($this->name, ['size' => 64, 'shape' => 'circle']),
+```
+
+### Consistent per-user avatars (no storage)
+
+The color selection is purely deterministic — `nameToIndex()` hashes the name string to a stable palette index. The same name input always produces identical output. No database column or file storage needed.
+
+---
+
+## Running Tests
+
+```bash
+composer install
+vendor/bin/phpunit
 ```
 
 ---
 
 ## License
 
-MIT
+MIT © Jackson K
