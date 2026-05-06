@@ -1,5 +1,5 @@
 {
-    "name": "pixelo/avatar-generator",
+    "name": "jackson/pixelo",
     "description": "Generate dynamic profile placeholder images for Laravel applications",
     "type": "library",
     "keywords": [

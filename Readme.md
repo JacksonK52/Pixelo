@@ -37,7 +37,7 @@ No external services, no heavy dependencies — just PHP's built-in GD extension
 ## Installation
 
 ```bash
-composer require pixelo/avatar-generator
+composer require jackson/pixelo
 ```
 
 Laravel's package auto-discovery registers the service provider and `Pixelo` facade automatically.
@@ -58,10 +58,10 @@ php artisan vendor:publish --tag=pixelo-config
 use pixelo\Facades\Pixelo;
 
 // Embed in <img src>
-$dataUri = Pixelo::make('John Doe')->toBase64();
+$dataUri = Pixelo::make('Jackson Konjengbam')->toBase64();
 
 // Laravel HTTP response (for controller actions)
-return Pixelo::make('Jane Smith')->size(256)->shape('rounded')->toResponse();
+return Pixelo::make('Jackson Konjengbam')->size(256)->shape('rounded')->toResponse();
 
 // Save PNG to disk
 Pixelo::make('Alice')->save(storage_path('app/public/avatars/alice.png'));
@@ -85,10 +85,10 @@ $png = Pixelo::make('Bob')
 
 ```php
 // Returns a data URI
-$src = pixelo('John Doe');
+$src = pixelo('Jackson Konjengbam');
 
 // With options
-$src = pixelo('Jane Smith', [
+$src = pixelo('Jackson Konjengbam', [
     'size'   => 64,
     'shape'  => 'rounded',
     'bg'     => '5E35B1',     // hex without #
@@ -98,22 +98,22 @@ $src = pixelo('Jane Smith', [
 ]);
 
 // Returns a route URL
-$url = pixelo_url('John Doe', ['size' => 128, 'shape' => 'circle']);
+$url = pixelo_url('Jackson Konjengbam', ['size' => 128, 'shape' => 'circle']);
 ```
 
 ### Blade templates
 
 ```blade
 {{-- Data URI (inline, no HTTP request) --}}
-<img src="{{ pixelo('John Doe') }}" width="64" height="64" alt="JD">
+<img src="{{ pixelo('Jackson Konjengbam') }}" width="64" height="64" alt="JD">
 
 {{-- Blade directive --}}
-<img src="@pixeloAvatar('John Doe')" width="64" alt="JD">
+<img src="@pixeloAvatar('Jackson Konjengbam')" width="64" alt="JD">
 <img src="@pixeloAvatar('Jane', ['size' => 96, 'shape' => 'rounded'])" width="96" alt="J">
 
 {{-- Route URL --}}
-<img src="@pixeloUrl('John Doe')" width="64" alt="JD">
-<img src="{{ pixelo_url('John Doe', ['size' => 128]) }}" width="128">
+<img src="@pixeloUrl('Jackson Konjengbam')" width="64" alt="JD">
+<img src="{{ pixelo_url('Jackson Konjengbam', ['size' => 128]) }}" width="128">
 ```
 
 ### HTTP endpoint
