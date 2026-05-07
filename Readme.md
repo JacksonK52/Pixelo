@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="pixelo.png" alt="Pixelo Logo" />
+    <img src="pixelo.png" alt="Pixelo Logo" width="220" />
 </p>
 
 # Pixelo — Laravel Avatar Generator
