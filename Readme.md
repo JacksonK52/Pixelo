@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="pixelo.png" alt="Pixelo Logo" />
+</p>
+
 # Pixelo — Laravel Avatar Generator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
